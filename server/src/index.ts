@@ -1,7 +1,7 @@
 import Koa from "koa";
 import koaBody from "koa-body";
-import KoaRouter from "koa-router";
-import jwt from "jsonwebtoken";
+import KoaRouter from "@koa/router";
+import koaWs from "koa-easy-ws";
 
 const app = new Koa();
 const router = new KoaRouter();
@@ -12,40 +12,53 @@ const config = {
 
 let lobbies: { [id: string]: Lobby } = {};
 
+class Player {
+  name: string;
+  ws: WebSocket;
+
+  constructor(name: string, ws: WebSocket) {
+    this.name = name;
+    this.ws = ws;
+  }
+}
+
 class Lobby {
   id: string;
   players = [];
 
-  constructor(id: string, jwt: string) {
+  constructor(id: string) {
     this.id = id;
   }
 }
 
-router.get("/", (ctx, next) => {
-  ctx.body = "hello there";
+router.get("/", (ctx) => {
+  ctx.body = "mindgame";
 });
 
-router.post("/lobby/", (ctx, next) => {
-  //create lobby, return jwt to connect with
+router.get("/lobbies", (ctx) => {
+  ctx.body = lobbies;
+});
+
+router.post("/lobby/:id", (ctx) => {
+  //create lobby
   const id = ctx.params.id;
-  let jwtSecretKey = process.env.JWT_SECRET_KEY;
-
-  if (!id || !jwtSecretKey) {
-    return;
+  if (!lobbies[id]) {
+    lobbies[id] = new Lobby(id);
+    console.log(`Added lobby with id: ${id}`);
+  } else {
+    ctx.body = "lobby already exists";
   }
-  let data = {
-    time: Date(),
-    id,
-  };
-
-  const token = jwt.sign(data, jwtSecretKey);
 });
 
-router.get("/lobby/ws", (ctx, next) => {
-  //connect to lobby, provide jwt and server connects to lobby
+router.get("/lobby/:id/ws", async (ctx) => {
+  //connect to lobby
+  if (!ctx.ws) return;
+
+  const ws: WebSocket = await ctx.ws();
 });
 
 app.use(koaBody());
+app.use(koaWs());
 app.use(router.routes());
 app.listen(5000);
 
