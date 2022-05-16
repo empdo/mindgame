@@ -1,8 +1,10 @@
 import Koa from "koa";
 import koaBody from "koa-body";
-import KoaRouter from "@koa/router";
 import koaWs from "koa-easy-ws";
+import KoaRouter from "@koa/router";
 import koaCors from "@koa/cors";
+import WebSocket from "ws";
+import { v4 as uuidv4 } from "uuid";
 
 const app = new Koa();
 const router = new KoaRouter();
@@ -13,66 +15,116 @@ const config = {
 
 let lobbies: { [id: string]: Lobby } = {};
 
+export const sleep = async (duration: number) =>
+  await new Promise<void>((resolve) => setTimeout(resolve, duration));
+
 class Player {
   name: string;
   ws: WebSocket;
   readyState: boolean;
+  id: string;
+  lobby: Lobby;
+  cards: number[] = [];
 
-  constructor(name: string, ws: WebSocket) {
+  constructor(name: string, ws: WebSocket, lobby: Lobby) {
     this.name = name;
     this.ws = ws;
     this.readyState = false;
+    this.id = uuidv4();
+    this.lobby = lobby;
+
+    this.ws.on("message", this.handleMessage.bind(this));
+  }
+
+  handleMessage(e: string) {
+    if (!e) return;
+
+    const { type, data } = JSON.parse(e);
+
+    if (type === 1) {
+      this.readyState = !this.readyState;
+
+      if (this.lobby.players.every((player) => player.readyState === true)) {
+        this.lobby.initGame();
+      }
+    }
+
+    this.lobby.alertPlayersList();
   }
 }
 
 class Lobby {
   id: string;
   players: Player[] = [];
-  playing: boolean;
+  isPlaying: boolean = false;
+  playedCards: number[] = [];
 
   constructor(id: string) {
     this.id = id;
-    this.playing = false;
   }
 
-  addPlayer = (player: Player) => {
+  addPlayer(player: Player) {
     if (!player.ws) return;
 
     this.players.push(player);
 
     player.ws.onclose = () => this.socketClose(player);
-    player.ws.onmessage = (e) => this.handleMessage(e, player);
 
     this.alertPlayersList();
-  };
+  }
 
-  handleMessage = (e: MessageEvent<any>, player: Player) => {
-    if (!e.data) return;
-
-    const { type, data } = JSON.parse(e.data);
-
-    if (type === 1) {
-      player.readyState = !player.readyState;
-
-      if (this.players.every((player) => player.readyState === true)) {
-        this.gameloop();
-      }
-    }
-
-    this.alertPlayersList();
-  };
-
-  socketClose = (player: Player) => {
+  socketClose(player: Player) {
     this.players = this.players.filter((p) => p.ws !== player.ws);
     this.alertPlayersList();
-  };
+  }
 
-  gameloop = () => {
-    this.playing = true;
-    //skicka att de börjar till varej spelare
-    //de bygger sin scene
-    //de skickar okej tillbaka
-  };
+  async initGame() {
+    this.isPlaying = true;
+    await this.gameloop();
+  }
+
+  async gameloop() {
+    this.players.forEach((player) => {
+      player.ws.send(JSON.stringify({ type: 2 }));
+    });
+
+    let round = 1;
+    while (round < 8) {
+      this.initRound(round);
+      let correctCard = true;
+      let hasPlayedAllCards = false;
+
+      while (!hasPlayedAllCards && correctCard) {
+        await this.waitForCard();
+
+        correctCard =
+          this.playedCards[-1] < this.playedCards[-2] ||
+          this.playedCards.length < 2;
+
+        hasPlayedAllCards = this.players.every(
+          (player) => player.cards.length === 0
+        );
+      }
+    }
+  }
+
+  async waitForCard() {
+    const length = this.playedCards.length;
+    while (length >= this.playedCards.length) {
+      await sleep(10);
+    }
+  }
+
+  initRound(roundIndex: number) {
+    let numbers = [...Array(100).keys()];
+    numbers = numbers.sort(() => 0.5 - Math.random());
+
+    //byt ut mot broadcast function
+    this.players.forEach((player) => {
+      player.cards = numbers.splice(0, roundIndex);
+      player.ws.send(JSON.stringify({ type: 3, data: player.cards }));
+    });
+  }
 
   alertPlayersList = () => {
     //change to only update the thing that has changed
@@ -112,8 +164,10 @@ router.get("/lobby/:id/", async (ctx) => {
     console.log(`Creating lobby with id: ${id}`);
     lobbies[id] = new Lobby(id);
   }
-
-  lobbies[id].addPlayer(new Player(ctx.request.hostname, ws));
+  if (!lobbies[id].isPlaying) {
+    lobbies[id].addPlayer(new Player(ctx.request.hostname, ws, lobbies[id]));
+    ctx.body = "Lobby is playing";
+  }
 });
 
 app.use(koaBody());
