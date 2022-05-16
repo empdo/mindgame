@@ -28,9 +28,11 @@ class Player {
 class Lobby {
   id: string;
   players: Player[] = [];
+  playing: boolean;
 
   constructor(id: string) {
     this.id = id;
+    this.playing = false;
   }
 
   addPlayer = (player: Player) => {
@@ -51,6 +53,10 @@ class Lobby {
 
     if (type === 1) {
       player.readyState = !player.readyState;
+
+      if (this.players.every((player) => player.readyState === true)) {
+        this.gameloop();
+      }
     }
 
     this.alertPlayersList();
@@ -62,6 +68,7 @@ class Lobby {
   };
 
   gameloop = () => {
+    this.playing = true;
     //skicka att de börjar till varej spelare
     //de bygger sin scene
     //de skickar okej tillbaka
