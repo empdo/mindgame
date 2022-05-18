@@ -34,6 +34,7 @@ class Player {
     this.lobby = lobby;
 
     this.ws.on("message", this.handleMessage.bind(this));
+    this.ws.onclose = () => this.socketClose();
   }
 
   handleMessage(e: string) {
@@ -54,6 +55,16 @@ class Player {
 
     this.lobby.alertPlayersList();
   }
+
+  socketClose() {
+    this.lobby.players = this.lobby.players.filter((p) => p.ws !== this.ws);
+
+    if (this.lobby.players.length === 0) {
+      this.lobby.isPlaying = false;
+    }
+
+    this.lobby.alertPlayersList();
+  }
 }
 
 class Lobby {
@@ -61,6 +72,7 @@ class Lobby {
   players: Player[] = [];
   isPlaying: boolean = false;
   playedCards: number[] = [];
+  lifes: number = 0;
 
   constructor(id: string) {
     this.id = id;
@@ -71,13 +83,6 @@ class Lobby {
 
     this.players.push(player);
 
-    player.ws.onclose = () => this.socketClose(player);
-
-    this.alertPlayersList();
-  }
-
-  socketClose(player: Player) {
-    this.players = this.players.filter((p) => p.ws !== player.ws);
     this.alertPlayersList();
   }
 
@@ -87,10 +92,13 @@ class Lobby {
   }
 
   async gameloop() {
-    this.broadcast(2, "");
+    this.broadcast(2);
 
     let round = 1;
-    while (round < 8) {
+    this.lifes = this.players.length;
+    this.broadcast(5, this.lifes);
+
+    while (round < 8 && this.lifes > 0) {
       this.initRound(round);
       let correctCard = true;
       let hasPlayedAllCards = false;
@@ -112,14 +120,19 @@ class Lobby {
           (player) => player.cards.length === 0
         );
       }
-      round += 1;
 
       if (!correctCard) {
-        this.broadcast(5, "");
-        console.log(correctCard);
         this.playedCards = [];
-        round = 1;
+        this.lifes -= 1;
+        this.broadcast(5, this.lifes);
+      } else {
+        round += 1;
       }
+    }
+
+    if (!this.lifes) {
+      this.broadcast(6);
+      this.gameloop();
     }
   }
 
@@ -142,7 +155,7 @@ class Lobby {
     );
   }
 
-  broadcast(type: number, data: any) {
+  broadcast(type: number, data?: any, ws?: WebSocket) {
     this.players.forEach((player) => {
       player.ws.send(
         JSON.stringify({
@@ -154,8 +167,9 @@ class Lobby {
   }
 
   initRound(roundIndex: number) {
+    console.log("initiating round...");
+
     this.playedCards = [];
-    console.log("init round");
     let numbers = [...Array(100).keys()];
     numbers = numbers.sort(() => 0.5 - Math.random());
 
@@ -186,7 +200,7 @@ router.get("/lobby/:id/", async (ctx) => {
     console.log(`Creating lobby with id: ${id}`);
     lobbies[id] = new Lobby(id);
   }
-  if (!lobbies[id].isPlaying) {
+  if (!lobbies[id].isPlaying && !(lobbies[id].players.length >= 4)) {
     lobbies[id].addPlayer(new Player(ctx.request.hostname, ws, lobbies[id]));
     ctx.body = "Lobby is playing";
   }
