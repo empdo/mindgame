@@ -47,6 +47,9 @@ class Player {
       if (this.lobby.players.every((player) => player.readyState === true)) {
         this.lobby.initGame();
       }
+    } else if (type === 2) {
+      this.lobby.playedCards.push(data);
+      this.cards = this.cards.filter((card) => card !== data);
     }
 
     this.lobby.alertPlayersList();
@@ -84,9 +87,7 @@ class Lobby {
   }
 
   async gameloop() {
-    this.players.forEach((player) => {
-      player.ws.send(JSON.stringify({ type: 2 }));
-    });
+    this.broadcast(2, "");
 
     let round = 1;
     while (round < 8) {
@@ -95,15 +96,29 @@ class Lobby {
       let hasPlayedAllCards = false;
 
       while (!hasPlayedAllCards && correctCard) {
+        this.broadcast(4, this.playedCards);
         await this.waitForCard();
 
+        const length = this.playedCards.length;
+        if (length === 1) {
+          //check lowest card
+        }
+
         correctCard =
-          this.playedCards[-1] < this.playedCards[-2] ||
+          this.playedCards[length - 1] > this.playedCards[length - 2] ||
           this.playedCards.length < 2;
 
         hasPlayedAllCards = this.players.every(
           (player) => player.cards.length === 0
         );
+      }
+      round += 1;
+
+      if (!correctCard) {
+        this.broadcast(5, "");
+        console.log(correctCard);
+        this.playedCards = [];
+        round = 1;
       }
     }
   }
@@ -115,7 +130,32 @@ class Lobby {
     }
   }
 
+  alertPlayersList() {
+    this.broadcast(
+      1,
+      this.players.map((player) => {
+        return {
+          name: player.name,
+          readyState: player.readyState,
+        };
+      })
+    );
+  }
+
+  broadcast(type: number, data: any) {
+    this.players.forEach((player) => {
+      player.ws.send(
+        JSON.stringify({
+          type,
+          data,
+        })
+      );
+    });
+  }
+
   initRound(roundIndex: number) {
+    this.playedCards = [];
+    console.log("init round");
     let numbers = [...Array(100).keys()];
     numbers = numbers.sort(() => 0.5 - Math.random());
 
@@ -125,24 +165,6 @@ class Lobby {
       player.ws.send(JSON.stringify({ type: 3, data: player.cards }));
     });
   }
-
-  alertPlayersList = () => {
-    //change to only update the thing that has changed
-    this.players.forEach((player) => {
-      player.ws.send(
-        JSON.stringify({
-          type: "1",
-          data: this.players.map((player) => {
-            return {
-              name: player.name,
-              readyState: player.readyState,
-            };
-          }),
-        })
-      );
-    });
-    console.log(lobbies);
-  };
 }
 
 router.get("/", (ctx) => {
