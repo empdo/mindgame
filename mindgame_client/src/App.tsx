@@ -1,12 +1,12 @@
 import "./App.css";
-import Lobbies from "./Lobbies";
+import Game from "./Game";
 import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <div className="App">
       <Routes>
-        <Route path="/game/:id" element={<Lobbies />} />
+        <Route path="/game/:id" element={<Game />} />
       </Routes>
     </div>
   );

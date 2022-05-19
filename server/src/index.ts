@@ -73,7 +73,7 @@ class Lobby {
   isPlaying: boolean = false;
   playedCards: number[] = [];
   dealtCards: number[] = [];
-  lifes: number = 0;
+  lives: number = 0;
 
   constructor(id: string) {
     this.id = id;
@@ -96,10 +96,10 @@ class Lobby {
     this.broadcast(2);
 
     let round = 1;
-    this.lifes = this.players.length;
-    this.broadcast(5, this.lifes);
+    this.lives = this.players.length;
+    this.broadcast(5, this.lives);
 
-    while (round < 8 && this.lifes > 0) {
+    while (round < 8 && this.lives > 0) {
       this.initCards(round);
       let correctCard = true;
       let hasPlayedAllCards = false;
@@ -109,8 +109,6 @@ class Lobby {
         await this.waitForCard();
 
         const length = this.playedCards.length;
-
-        console.log(this.playedCards, this.dealtCards);
 
         correctCard =
           this.playedCards[length - 1] === this.dealtCards[length - 1];
@@ -124,14 +122,14 @@ class Lobby {
         this.playedCards = [];
         this.dealtCards = [];
 
-        this.lifes -= 1;
-        this.broadcast(5, this.lifes);
+        this.lives -= 1;
+        this.broadcast(5, this.lives);
       } else {
         round += 1;
       }
     }
 
-    if (!this.lifes) {
+    if (!this.lives) {
       this.broadcast(6);
       this.gameloop();
     }
