@@ -72,6 +72,7 @@ class Lobby {
   players: Player[] = [];
   isPlaying: boolean = false;
   playedCards: number[] = [];
+  dealtCards: number[] = [];
   lifes: number = 0;
 
   constructor(id: string) {
@@ -99,7 +100,7 @@ class Lobby {
     this.broadcast(5, this.lifes);
 
     while (round < 8 && this.lifes > 0) {
-      this.initRound(round);
+      this.initCards(round);
       let correctCard = true;
       let hasPlayedAllCards = false;
 
@@ -108,13 +109,11 @@ class Lobby {
         await this.waitForCard();
 
         const length = this.playedCards.length;
-        if (length === 1) {
-          //check lowest card
-        }
+
+        console.log(this.playedCards, this.dealtCards);
 
         correctCard =
-          this.playedCards[length - 1] > this.playedCards[length - 2] ||
-          this.playedCards.length < 2;
+          this.playedCards[length - 1] === this.dealtCards[length - 1];
 
         hasPlayedAllCards = this.players.every(
           (player) => player.cards.length === 0
@@ -123,6 +122,8 @@ class Lobby {
 
       if (!correctCard) {
         this.playedCards = [];
+        this.dealtCards = [];
+
         this.lifes -= 1;
         this.broadcast(5, this.lifes);
       } else {
@@ -166,18 +167,24 @@ class Lobby {
     });
   }
 
-  initRound(roundIndex: number) {
+  initCards(roundIndex: number) {
     console.log("initiating round...");
 
-    this.playedCards = [];
     let numbers = [...Array(100).keys()];
     numbers = numbers.sort(() => 0.5 - Math.random());
 
+    this.dealtCards = [];
+    this.playedCards = [];
+
     //byt ut mot broadcast function
     this.players.forEach((player) => {
-      player.cards = numbers.splice(0, roundIndex);
+      const cards = numbers.splice(0, roundIndex);
+      player.cards = cards;
+      this.dealtCards.push(...cards);
       player.ws.send(JSON.stringify({ type: 3, data: player.cards }));
     });
+
+    this.dealtCards = this.dealtCards.sort();
   }
 }
 
