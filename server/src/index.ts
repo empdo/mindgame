@@ -14,6 +14,14 @@ const config = {
 };
 
 let lobbies: { [id: string]: Lobby } = {};
+const names = [
+  "Roddy ST.James",
+  "Rita Malone",
+  "Whitey",
+  "Sid",
+  "Toad",
+  "Le Frog",
+];
 
 export const sleep = async (duration: number) =>
   await new Promise<void>((resolve) => setTimeout(resolve, duration));
@@ -206,7 +214,13 @@ router.get("/lobby/:id/", async (ctx) => {
     lobbies[id] = new Lobby(id);
   }
   if (!lobbies[id].isPlaying && !(lobbies[id].players.length >= 4)) {
-    lobbies[id].addPlayer(new Player(ctx.request.hostname, ws, lobbies[id]));
+    const _names = names.filter(
+      (name) => !lobbies[id].players.map((player) => player.name).includes(name)
+    );
+
+    const name = _names[Math.floor(Math.random() * _names.length)];
+
+    lobbies[id].addPlayer(new Player(name, ws, lobbies[id]));
     ctx.body = "Lobby is playing";
   }
 });
