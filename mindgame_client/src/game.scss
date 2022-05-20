@@ -13,6 +13,10 @@ body, html {
 
 .App {
     background-color: #16181D;
+//    background-image: url("/file2.png");
+//    background-position: center;
+//    background-size: cover;
+//    background-repeat: no-repeat;
     color: white;
     height: 100vh;
     display: flex;
@@ -62,3 +66,15 @@ button {
         filter: invert(50%);
     }
 }
+
+#card-holder {
+
+    #card {
+        border: solid 0.2rem white;
+        width: 4rem;
+        height: 5rem;
+        border-radius: 0.3rem;
+
+    }
+}
+

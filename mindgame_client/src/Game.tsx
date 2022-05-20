@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import Players from "./Players";
 import Lobby from "./Lobby";
 import "./game.scss";
+import Cards from "./Cards";
 
 const defaultLobbyState: LobbyState = {
   players: [],
@@ -88,7 +89,7 @@ const Game = () => {
           <Players />
           {gameReducer.started && <Lives />}
         </div>
-        {gameReducer.started ? <div></div> : <Lobby toggle={toggleReady} />}
+        {gameReducer.started ? <Cards /> : <Lobby toggle={toggleReady} />}
       </GameContext.Provider>
     </>
   );
