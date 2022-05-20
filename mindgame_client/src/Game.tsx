@@ -30,7 +30,7 @@ const gameStateReducer = <T extends GameEvent>(
     case ActionType.YourCards:
       return { ...state, YourCards: action.data };
     case ActionType.Lives:
-      return { ...state, Lives: action.data };
+      return { ...state, lives: action.data };
   }
 };
 
@@ -50,7 +50,6 @@ const Game = () => {
       ws = new WebSocket(url);
       ws.addEventListener("message", (e) => {
         const data = JSON.parse(e.data);
-        console.log(data.type);
         handleGameReducer(data);
       });
 
@@ -65,19 +64,31 @@ const Game = () => {
     }
   };
 
+  const Lives = () => {
+    console.log(gameReducer.lives);
+    const hearts = Array(gameReducer.lives).fill(
+      <img src="/favorite_FILL1_wght400_GRAD0_opsz48.svg" alt="" />
+    );
+    const darkHearts = Array(
+      gameReducer.players.length - gameReducer.lives
+    ).fill(
+      <img src="/favorite_FILL1_wght400_GRAD0_opsz48.svg" id="dark" alt="" />
+    );
+    return (
+      <>
+        {hearts} {darkHearts}
+      </>
+    );
+  };
+
   return (
     <>
       <GameContext.Provider value={gameReducer}>
-        <Players />
-        <Lobby toggle={toggleReady} />
-        {gameReducer.started ? (
-          <div>
-            <h1>Started</h1>
-            <h2>lifes: {gameReducer.lives}</h2>
-          </div>
-        ) : (
-          <div></div>
-        )}
+        <div id="top-bar">
+          <Players />
+          {gameReducer.started && <Lives />}
+        </div>
+        {gameReducer.started ? <div></div> : <Lobby toggle={toggleReady} />}
       </GameContext.Provider>
     </>
   );

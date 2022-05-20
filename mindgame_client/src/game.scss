@@ -42,3 +42,23 @@ button {
     justify-content: center;
     align-items: center;
 }
+
+#top-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    > * {
+        flex: 1;
+    }
+    img {
+        height: 2.5rem;
+        max-width: 2.5rem;
+        filter: invert(100%);
+        margin: 0.5rem;
+    }
+
+    #dark {
+        filter: invert(50%);
+    }
+}
