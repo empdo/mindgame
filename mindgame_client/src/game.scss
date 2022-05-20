@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&display=swap');
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+
+#root {
+    height: 100vh;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 1.3rem;
+}
+
+.App {
+    background-color: #16181D;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h3 {margin: 0;}
+
+#players-container {
+    display: flex; 
+    > div {
+        padding: 0.5rem;
+        align-content: center;
+    }
+}
+
+button { 
+    padding: 1rem; 
+    border-radius: 10px;
+    font-size: 2.5rem;
+}
+
+#lobby {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

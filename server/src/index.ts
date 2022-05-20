@@ -101,7 +101,7 @@ class Lobby {
   }
 
   async gameloop() {
-    this.broadcast(2);
+    this.broadcast(2, true);
 
     let round = 1;
     this.lives = this.players.length;
@@ -151,18 +151,24 @@ class Lobby {
   }
 
   alertPlayersList() {
-    this.broadcast(
-      1,
-      this.players.map((player) => {
-        return {
-          name: player.name,
-          readyState: player.readyState,
-        };
-      })
-    );
+    this.players.forEach((player) => {
+      player.ws.send(
+        JSON.stringify({
+          type: 1,
+          data: this.players.map((_player) => {
+            return {
+              name: _player.name,
+              readyState: _player.readyState,
+              local: _player.ws === player.ws,
+            };
+          }),
+        })
+      );
+    });
   }
 
   broadcast(type: number, data?: any, ws?: WebSocket) {
+    console.log(type);
     this.players.forEach((player) => {
       player.ws.send(
         JSON.stringify({

@@ -1,6 +1,7 @@
 export interface User {
   name: string;
   readyState: boolean;
+  local: boolean;
 }
 
 export interface BaseEvent {

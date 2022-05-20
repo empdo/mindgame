@@ -1,0 +1,112 @@
+import React from "react";
+import { User, ActionType, GameEvent, LobbyState } from "./interfaces";
+import { useParams } from "react-router-dom";
+import Players from "./Players";
+
+const defaultLobbyState : LobbyState= {
+    players: [],
+    started: false,
+    ready: false,
+    dealtCards: [],
+    yourCards: [],
+    lives: 0,
+}
+
+
+
+const gameStateReducer = <T extends GameEvent>(state: LobbyState, action:  GameEvent) => {
+    switch (action.type) {
+        case ActionType.PlayerJoin:
+            return {...state, players: [...state.players, action.data]}
+
+    }
+};
+
+
+const Game = () => {
+  let [ws, setWs] = React.useState<WebSocket | undefined>();
+
+  const [gameReducer, handleGameReducer] = React.useReducer(
+          gameStateReducer,
+          defaultLobbyState
+          );
+
+
+  const { id } = useParams();
+  const url = `ws://localhost:5000/lobby/${id}/`;
+
+  React.useEffect(() => {
+    if (id) {
+      setWs(new WebSocket(url));
+    }
+  }, [id]);
+
+  if (!id) return <>Id missing from params</>;
+
+  }
+
+  //  const toggleReady = async () => {
+  //    if (ws !== undefined) {
+  //      console.log("toggle ready");
+  //      ws.send(JSON.stringify({ type: 1, data: null }));
+  //    }
+  //  };
+  //
+  //  const DealtCards = (): JSX.Element => {
+  //    return (
+  //      <>
+  //        {dealtCards.map((card) => (
+  //          <h1>{card}</h1>
+  //        ))}
+  //      </>
+  //    );
+  //  };
+  //
+  //  const YouCards = (): JSX.Element => {
+  //    const sendCard = (card: number) => {
+  //      if (ws) {
+  //        ws.send(JSON.stringify({ type: 2, data: card }));
+  //        setYourCards(yourCards.filter((_card) => _card !== card));
+  //      }
+  //    };
+  //
+  //    return (
+  //      <>
+  //        {yourCards.map((card) => (
+  //          <>
+  //            <h1>{card}</h1>
+  //            <button onClick={() => sendCard(card)}>Put this one!</button>
+  //          </>
+  //        ))}
+  //      </>
+  //    );
+  //  };
+
+  return (
+    <>
+      {JSON.stringify(users)}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          // toggleReady();
+          setReady(!ready);
+        }}
+      >
+        ready
+      </button>
+      <h2>{ready ? "ready" : "not ready"}</h2>
+      {started ? (
+        <div>
+          <h1>Started</h1>
+          <h2>lifes: {lifes}</h2>
+        </div>
+      ) : (
+        <div>
+          <h1>Waiting for players to ready up</h1>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Game;
