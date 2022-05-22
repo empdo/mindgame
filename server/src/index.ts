@@ -108,6 +108,8 @@ class Lobby {
     this.broadcast(5, this.lives);
 
     while (round < 8 && this.lives > 0) {
+      this.playedCards = [];
+      this.dealtCards = [];
       this.initCards(round);
       let correctCard = true;
       let hasPlayedAllCards = false;
@@ -127,9 +129,6 @@ class Lobby {
       }
 
       if (!correctCard) {
-        this.playedCards = [];
-        this.dealtCards = [];
-
         this.lives -= 1;
         this.broadcast(5, this.lives);
       } else {
