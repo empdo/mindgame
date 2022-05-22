@@ -1,0 +1,51 @@
+.card {
+    position: relative;
+    background-color: #16181D;
+    border: 0.2rem solid white;
+    width: 10rem;
+    min-width: 8rem;
+    height: 14rem;
+    border-radius: 0.5rem;
+    box-shadow: 2rem 0 3rem #000;
+
+    transition: 0.2s;
+}
+#your-cards {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+
+    padding: 10rem;
+
+    .card:not(:last-child) {
+        margin-left: -2rem;
+    }
+
+    .card:hover {
+        transform: translateY(-1.5rem);
+    }
+
+    .card:hover~.card {
+        transform: translateX(-1.5rem);
+    }
+
+}
+#dealt-cards {
+    display: flex;
+    flex-direction: row;    
+    justify-content: center;
+}                           
+
+#spacer {
+    flex: 1;
+}
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                        
+                            
+                            
