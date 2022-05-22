@@ -111,8 +111,8 @@ class Lobby {
       this.playedCards = [];
       this.dealtCards = [];
       this.initCards(round);
-      let correctCard = true;
       let hasPlayedAllCards = false;
+      let correctCard = true;
 
       while (!hasPlayedAllCards && correctCard) {
         this.broadcast(4, this.playedCards);
@@ -127,13 +127,13 @@ class Lobby {
           (player) => player.cards.length === 0
         );
       }
-
       if (!correctCard) {
         this.lives -= 1;
         this.broadcast(5, this.lives);
       } else {
         round += 1;
       }
+      console.log(correctCard, round);
     }
 
     if (!this.lives) {
@@ -167,7 +167,6 @@ class Lobby {
   }
 
   broadcast(type: number, data?: any, ws?: WebSocket) {
-    console.log(type);
     this.players.forEach((player) => {
       player.ws.send(
         JSON.stringify({
@@ -195,7 +194,10 @@ class Lobby {
       player.ws.send(JSON.stringify({ type: 3, data: player.cards }));
     });
 
-    this.dealtCards = this.dealtCards.sort();
+    this.dealtCards = this.dealtCards.sort(function (a, b) {
+      return a > b ? 1 : -1;
+    });
+    console.log(this.dealtCards);
   }
 }
 

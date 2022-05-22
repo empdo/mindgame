@@ -30,7 +30,12 @@ const gameStateReducer = <T extends GameEvent>(
     case ActionType.DealtCards:
       return { ...state, dealtCards: action.data };
     case ActionType.YourCards:
-      return { ...state, yourCards: action.data };
+      return {
+        ...state,
+        yourCards: action.data.sort(function (a, b) {
+          return a > b ? -1 : 1;
+        }),
+      };
     case ActionType.Lives:
       return { ...state, lives: action.data };
     case ActionType.Lost:

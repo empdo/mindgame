@@ -51,6 +51,7 @@ button {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
 
     > * {
         flex: 1;
@@ -64,13 +65,23 @@ button {
 
     #dark {
         filter: invert(50%);
+        animation-name: damage;
+        animation-duration: 0.15s;
+        height: 2.4rem;
     }
 }
 
-#card-holder {
-
-    #card {
-
+@keyframes damage {
+    0% {
+        height: 2.5rem;
+        transform: translateX(0.5rem);
+        filter: invert(100%);
+    }
+    50% {
+        transform: translateX(-0.5rem);
+    }
+    100%{
+        filter: invert(50%);
+        height: 2.4rem;
     }
 }
-
