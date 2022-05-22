@@ -13,6 +13,7 @@ const defaultLobbyState: LobbyState = {
   dealtCards: [],
   yourCards: [],
   lives: 0,
+  lost: false,
 };
 
 export const GameContext = React.createContext<LobbyState>(defaultLobbyState);
@@ -29,9 +30,11 @@ const gameStateReducer = <T extends GameEvent>(
     case ActionType.DealtCards:
       return { ...state, dealtCards: action.data };
     case ActionType.YourCards:
-      return { ...state, YourCards: action.data };
+      return { ...state, yourCards: action.data };
     case ActionType.Lives:
       return { ...state, lives: action.data };
+    case ActionType.Lost:
+      return { ...state, lost: action.data };
   }
 };
 
@@ -64,6 +67,11 @@ const Game = () => {
       ws.send(JSON.stringify({ type: 1 }));
     }
   };
+  const sendCard = (card: number) => {
+    if (ws) {
+      ws.send(JSON.stringify({ type: 2, data: card }));
+    }
+  };
 
   const Lives = () => {
     console.log(gameReducer.lives);
@@ -89,7 +97,11 @@ const Game = () => {
           <Players />
           {gameReducer.started && <Lives />}
         </div>
-        {gameReducer.started ? <Cards /> : <Lobby toggle={toggleReady} />}
+        {gameReducer.started ? (
+          <Cards sendCard={sendCard} />
+        ) : (
+          <Lobby toggle={toggleReady} />
+        )}
       </GameContext.Provider>
     </>
   );

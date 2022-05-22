@@ -30,13 +30,18 @@ export interface LivesEvent extends BaseEvent {
   type: ActionType.Lives;
   data: number;
 }
+export interface LostEvent extends BaseEvent {
+  type: ActionType.Lost;
+  data: boolean;
+}
 
 export type GameEvent =
   | PlayerJoinEvent
   | StartedEvent
   | YourCardsEvent
   | DealtCardsEvent
-  | LivesEvent;
+  | LivesEvent
+  | LostEvent;
 
 export enum ActionType {
   PlayerJoin = 1,
@@ -44,6 +49,7 @@ export enum ActionType {
   YourCards = 3,
   DealtCards = 4,
   Lives = 5,
+  Lost = 6,
 }
 
 export interface LobbyState {
@@ -53,4 +59,5 @@ export interface LobbyState {
   dealtCards: number[];
   yourCards: number[];
   lives: number;
+  lost: boolean;
 }
