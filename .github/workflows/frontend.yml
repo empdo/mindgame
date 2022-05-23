@@ -34,10 +34,10 @@ jobs:
                   key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
             - name: Install dependencies
-              run: cd mindgame_client; yarn install
+              run: yarn install
 
             - name: Build site
-              run: cd mindgame_client; yarn run
+              run: yarn run
 
             - name: Upload Files to server
               uses: Creepios/sftp-action@v1.0.3
@@ -46,5 +46,5 @@ jobs:
                   port: 2022
                   username: "git.5580d875"
                   password: ${{ secrets.password }}
-                  localPath: "./build/"
-                  remotePath: "./webroot/"
+                  localPath: "./mindgame_client/build/"
+                  remotePath: "./mindgame_client/webroot/"
