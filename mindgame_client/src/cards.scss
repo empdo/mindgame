@@ -33,12 +33,12 @@
 }
 #dealt-cards {
     display: flex;
-    flex-direction: row;    
+    flex-direction: row-reverse;    
     justify-content: center;
     overflow-x: scroll;
 
-    .card:not(:first-child) {
-        margin-left: -2rem;
+    .card:not(:last-child) {
+        margin-left: -9.5rem;
     }
     .card {
     box-shadow: -1rem 1rem 1rem #0004;
@@ -48,13 +48,33 @@
 #spacer {
     flex: 1;
 }
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                        
-                            
-                            
+           
+#newRound {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+
+    h1 {
+        animation: newRound 2s ease-in-out forwards;
+        width: 100%;
+        
+    }
+}
+
+@keyframes newRound {
+    0% {
+        transform: translateX(-50%);
+        opacity: 0%;
+    }
+    25%,75% {
+        transform: translate(0%);
+        opacity: 100%;
+    }
+    100% {
+        transform: translateX(50%);
+        opacity: 0%;
+    }
+}

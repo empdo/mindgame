@@ -178,7 +178,7 @@ class Lobby {
   }
 
   initCards(roundIndex: number) {
-    console.log("initiating round...");
+    console.log("initiating round:" + roundIndex);
 
     let numbers = [...Array(100).keys()];
     numbers = numbers.sort(() => 0.5 - Math.random());

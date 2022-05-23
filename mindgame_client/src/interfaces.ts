@@ -60,4 +60,5 @@ export interface LobbyState {
   yourCards: number[];
   lives: number;
   lost: boolean;
+  round: number;
 }

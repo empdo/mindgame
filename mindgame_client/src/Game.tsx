@@ -5,6 +5,7 @@ import Players from "./Players";
 import Lobby from "./Lobby";
 import "./game.scss";
 import Cards from "./Cards";
+//import AnimationEnd from "./AnimationEnd";
 
 const defaultLobbyState: LobbyState = {
   players: [],
@@ -14,6 +15,7 @@ const defaultLobbyState: LobbyState = {
   yourCards: [],
   lives: 0,
   lost: false,
+  round: 0,
 };
 
 export const GameContext = React.createContext<LobbyState>(defaultLobbyState);
@@ -32,6 +34,7 @@ const gameStateReducer = <T extends GameEvent>(
     case ActionType.YourCards:
       return {
         ...state,
+        round: action.data.length,
         yourCards: action.data.sort(function (a, b) {
           return a > b ? -1 : 1;
         }),
@@ -56,7 +59,7 @@ const Game = () => {
 
   React.useEffect(() => {
     if (id) {
-      ws = new WebSocket(url);
+      const ws = new WebSocket(url);
       ws.addEventListener("message", (e) => {
         const data = JSON.parse(e.data);
         handleGameReducer(data);
@@ -64,7 +67,7 @@ const Game = () => {
 
       setWs(ws);
     }
-  }, [id]);
+  }, [id, url]);
   if (!id) return <>Id missing from params</>;
 
   const toggleReady = () => {
@@ -79,15 +82,27 @@ const Game = () => {
   };
 
   const Lives = () => {
-    console.log(gameReducer.lives);
-    const hearts = Array(gameReducer.lives).fill(
-      <img src="/favorite_FILL1_wght400_GRAD0_opsz48.svg" alt="" />
-    );
-    const darkHearts = Array(
-      gameReducer.players.length - gameReducer.lives
-    ).fill(
-      <img src="/favorite_FILL1_wght400_GRAD0_opsz48.svg" id="dark" alt="" />
-    );
+    const hearts = [];
+    for (var i = 0; i < gameReducer.lives; i++) {
+      hearts.push(
+        <img
+          src="/favorite_FILL1_wght400_GRAD0_opsz48.svg"
+          alt=" "
+          key={"heart-" + i}
+        />
+      );
+    }
+    const darkHearts = [];
+    for (i = 0; i < gameReducer.players.length - gameReducer.lives; i++) {
+      darkHearts.push(
+        <img
+          src="/favorite_FILL1_wght400_GRAD0_opsz48.svg"
+          id="dark"
+          alt=" "
+          key={"darkheart-" + i}
+        />
+      );
+    }
     return (
       <>
         {hearts} {darkHearts}

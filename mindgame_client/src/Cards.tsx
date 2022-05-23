@@ -1,10 +1,20 @@
 import React from "react";
 import "./cards.scss";
 import { GameContext } from "./Game";
-import { LobbyState } from "./interfaces";
 
 const Cards = (props: { sendCard: (card: number) => void }) => {
   const gameData = React.useContext(GameContext);
+  const [newRound, setNewRound] = React.useState(true);
+
+  React.useEffect(() => {
+    setNewRound(true);
+    const sleep = async (duration: number) =>
+      await new Promise<void>((resolve) => setTimeout(resolve, duration));
+
+    sleep(3000).then(() => {
+      setNewRound(false);
+    });
+  }, [gameData.round]);
 
   const DealtCards = () => {
     return (
@@ -42,15 +52,29 @@ const Cards = (props: { sendCard: (card: number) => void }) => {
     );
   };
 
+  const RoundThing = () => {
+    return (
+      <div id="newRound">
+        <h1>Round {gameData.round}</h1>
+      </div>
+    );
+  };
+
   return (
     <>
-      <div id="dealt-cards">
-        <DealtCards />
-      </div>
-      <span id="spacer" />
-      <div id="your-cards">
-        <YourCards />
-      </div>
+      {newRound ? (
+        <RoundThing />
+      ) : (
+        <>
+          <div id="dealt-cards">
+            <DealtCards />
+          </div>
+          <span id="spacer" />
+          <div id="your-cards">
+            <YourCards />
+          </div>
+        </>
+      )}
     </>
   );
 };
