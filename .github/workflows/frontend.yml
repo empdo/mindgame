@@ -18,8 +18,9 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
+
             - name: Set correct path
-              uses: cd mindgame_client
+              uses: ./mindgame_client
 
             - name: Set up Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v1
