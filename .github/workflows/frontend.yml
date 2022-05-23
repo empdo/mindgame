@@ -34,10 +34,10 @@ jobs:
                   key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
             - name: Install dependencies
-              run: yarn install
+              run: cd mindgame_client; yarn install
 
             - name: Build site
-              run: yarn build
+              run: cd mindgame_client; yarn run
 
             - name: Upload Files to server
               uses: Creepios/sftp-action@v1.0.3
